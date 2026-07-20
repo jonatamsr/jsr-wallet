@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Model;
 
 use App\Exception\InsufficientFundsException;
+use App\Exception\InvalidAmountException;
 
 class Account
 {
@@ -45,7 +46,7 @@ class Account
     private function assertPositiveAmount(int $amount): void
     {
         if ($amount <= 0) {
-            throw new \InvalidArgumentException('Amount must be positive.');
+            throw new InvalidAmountException($amount);
         }
     }
 

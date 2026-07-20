@@ -79,7 +79,7 @@ class AccountTest extends TestCase
     {
         $account = new Account('100');
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(\App\Exception\InvalidAmountException::class);
 
         $account->deposit(0);
     }
@@ -88,7 +88,7 @@ class AccountTest extends TestCase
     {
         $account = new Account('100');
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(\App\Exception\InvalidAmountException::class);
 
         $account->deposit(-5);
     }
@@ -98,7 +98,7 @@ class AccountTest extends TestCase
         $account = new Account('100');
         $account->deposit(10);
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(\App\Exception\InvalidAmountException::class);
 
         $account->withdraw(0);
     }
@@ -108,7 +108,7 @@ class AccountTest extends TestCase
         $account = new Account('100');
         $account->deposit(10);
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(\App\Exception\InvalidAmountException::class);
 
         $account->withdraw(-5);
     }
