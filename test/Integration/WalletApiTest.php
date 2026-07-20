@@ -158,4 +158,36 @@ class WalletApiTest extends HttpTestCase
             'destination' => ['id' => '300', 'balance' => 15],
         ], $body);
     }
+
+    public function testWithdrawWithInsufficientFundsReturns404(): void
+    {
+        $this->client->request('POST', '/event', [
+            'headers' => ['Content-Type' => 'application/json'],
+            'json' => ['type' => 'deposit', 'destination' => '100', 'amount' => 5],
+        ]);
+
+        $response = $this->client->request('POST', '/event', [
+            'headers' => ['Content-Type' => 'application/json'],
+            'json' => ['type' => 'withdraw', 'origin' => '100', 'amount' => 50],
+        ]);
+
+        $this->assertSame(404, $response->getStatusCode());
+        $this->assertSame('0', (string) $response->getBody());
+    }
+
+    public function testTransferWithInsufficientFundsReturns404(): void
+    {
+        $this->client->request('POST', '/event', [
+            'headers' => ['Content-Type' => 'application/json'],
+            'json' => ['type' => 'deposit', 'destination' => '100', 'amount' => 5],
+        ]);
+
+        $response = $this->client->request('POST', '/event', [
+            'headers' => ['Content-Type' => 'application/json'],
+            'json' => ['type' => 'transfer', 'origin' => '100', 'destination' => '300', 'amount' => 50],
+        ]);
+
+        $this->assertSame(404, $response->getStatusCode());
+        $this->assertSame('0', (string) $response->getBody());
+    }
 }
