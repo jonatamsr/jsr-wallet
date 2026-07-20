@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Exception\BusinessException;
-use App\Exception\InvalidAmountException;
 use App\Service\AccountService;
 use Hyperf\HttpServer\Annotation\Controller;
 use Hyperf\HttpServer\Annotation\PostMapping;
@@ -35,51 +33,32 @@ class EventController extends AbstractController
     private function handleDeposit(int $amount): ResponseInterface
     {
         $destination = (string) $this->request->input('destination', '');
+        $account = $this->service->deposit($destination, $amount);
 
-        try {
-            $account = $this->service->deposit($destination, $amount);
-
-            return $this->response->json([
-                'destination' => $account->toArray(),
-            ])->withStatus(201);
-        } catch (InvalidAmountException) {
-            return $this->response->raw('0')->withStatus(400);
-        }
+        return $this->response->json([
+            'destination' => $account->toArray(),
+        ])->withStatus(201);
     }
 
     private function handleWithdraw(int $amount): ResponseInterface
     {
         $origin = (string) $this->request->input('origin', '');
+        $account = $this->service->withdraw($origin, $amount);
 
-        try {
-            $account = $this->service->withdraw($origin, $amount);
-
-            return $this->response->json([
-                'origin' => $account->toArray(),
-            ])->withStatus(201);
-        } catch (BusinessException) {
-            return $this->response->raw('0')->withStatus(404);
-        } catch (InvalidAmountException) {
-            return $this->response->raw('0')->withStatus(400);
-        }
+        return $this->response->json([
+            'origin' => $account->toArray(),
+        ])->withStatus(201);
     }
 
     private function handleTransfer(int $amount): ResponseInterface
     {
         $origin = (string) $this->request->input('origin', '');
         $destination = (string) $this->request->input('destination', '');
+        $result = $this->service->transfer($origin, $destination, $amount);
 
-        try {
-            $result = $this->service->transfer($origin, $destination, $amount);
-
-            return $this->response->json([
-                'origin' => $result->getOrigin()->toArray(),
-                'destination' => $result->getDestination()->toArray(),
-            ])->withStatus(201);
-        } catch (BusinessException) {
-            return $this->response->raw('0')->withStatus(404);
-        } catch (InvalidAmountException) {
-            return $this->response->raw('0')->withStatus(400);
-        }
+        return $this->response->json([
+            'origin' => $result->getOrigin()->toArray(),
+            'destination' => $result->getDestination()->toArray(),
+        ])->withStatus(201);
     }
 }
