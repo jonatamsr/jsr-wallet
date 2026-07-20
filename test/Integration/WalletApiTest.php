@@ -159,7 +159,7 @@ class WalletApiTest extends HttpTestCase
         ], $body);
     }
 
-    public function testWithdrawWithInsufficientFundsReturns404(): void
+    public function testWithdrawWithInsufficientFundsReturns422(): void
     {
         $this->client->request('POST', '/event', [
             'headers' => ['Content-Type' => 'application/json'],
@@ -171,11 +171,11 @@ class WalletApiTest extends HttpTestCase
             'json' => ['type' => 'withdraw', 'origin' => '100', 'amount' => 50],
         ]);
 
-        $this->assertSame(404, $response->getStatusCode());
+        $this->assertSame(422, $response->getStatusCode());
         $this->assertSame('0', (string) $response->getBody());
     }
 
-    public function testTransferWithInsufficientFundsReturns404(): void
+    public function testTransferWithInsufficientFundsReturns422(): void
     {
         $this->client->request('POST', '/event', [
             'headers' => ['Content-Type' => 'application/json'],
@@ -187,7 +187,7 @@ class WalletApiTest extends HttpTestCase
             'json' => ['type' => 'transfer', 'origin' => '100', 'destination' => '300', 'amount' => 50],
         ]);
 
-        $this->assertSame(404, $response->getStatusCode());
+        $this->assertSame(422, $response->getStatusCode());
         $this->assertSame('0', (string) $response->getBody());
     }
 }

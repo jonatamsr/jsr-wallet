@@ -6,4 +6,7 @@ namespace App\Exception;
 
 use RuntimeException;
 
-abstract class BusinessException extends RuntimeException {}
+abstract class BusinessException extends RuntimeException
+{
+    abstract public function getStatusCode(): int;
+}

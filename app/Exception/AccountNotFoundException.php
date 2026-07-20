@@ -10,4 +10,9 @@ class AccountNotFoundException extends BusinessException
     {
         parent::__construct("Account '{$accountId}' not found.");
     }
+
+    public function getStatusCode(): int
+    {
+        return 404;
+    }
 }

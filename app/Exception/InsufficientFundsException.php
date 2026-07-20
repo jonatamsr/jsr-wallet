@@ -12,4 +12,9 @@ class InsufficientFundsException extends BusinessException
             "Account '{$accountId}' has insufficient funds: balance={$balance}, requested={$amount}."
         );
     }
+
+    public function getStatusCode(): int
+    {
+        return 422;
+    }
 }
