@@ -26,5 +26,5 @@ docker compose up --build
 ## Running Tests
 
 ```bash
-docker compose exec app php vendor/bin/phpunit
+docker compose exec app composer test
 ```
