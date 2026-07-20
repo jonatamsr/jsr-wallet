@@ -58,10 +58,43 @@ app/
 └── Exception/     → Domain exceptions
 ```
 
-**Key decisions:**
-- **Single Swoole worker** (`WORKER_NUM=1`): guarantees consistent in-memory state across requests without shared-memory complexity.
-- **No database**: state lives in a static PHP array, persisted by the long-running Swoole process. `POST /reset` clears it.
-- **Layered separation**: Controllers handle HTTP only, Services orchestrate, Entities hold business rules.
+## Technical Decisions
+
+### Why Hyperf + Swoole?
+
+The spec says *"Durability IS NOT a requirement"*: no database needed. Swoole runs PHP as a long-lived process (like Node.js), so a simple static array persists state between requests naturally. No external storage, no serialization overhead, no infrastructure dependencies.
+
+Hyperf was chosen over plain Swoole for its routing, DI container, and testing client, just enough framework to avoid reinventing the wheel without over-engineering.
+
+### Single Worker (`WORKER_NUM=1`)
+
+Swoole can spawn multiple workers, each with its own memory space. With in-memory state in a static array, multiple workers would mean inconsistent state between requests. A single worker guarantees atomicity for all operations without needing locks, shared memory, or any synchronization mechanism.
+
+`MAX_REQUEST=0` ensures the worker never restarts (which would wipe state).
+
+### In-Memory Storage (Static Array)
+
+The simplest possible persistence that satisfies the spec. A `private static array $accounts` in the Repository class. No ORM, no Redis, no file system. `POST /reset` simply reassigns it to `[]`.
+
+### Layered Architecture (without over-engineering)
+
+```
+Controller → Service → Entity + Repository
+```
+
+- **Controller**: HTTP translation only. Receives request, calls service, returns response with correct status code. Zero business logic.
+- **Service**: Orchestration. Finds/creates accounts via repository, delegates mutations to the entity, persists.
+- **Entity (Account)**: Owns all business rules `deposit()`, `withdraw()` with balance validation, `assertPositiveAmount()` guard.
+- **Repository**: Pure storage abstraction over the static array.
+
+
+### Transfers Are Atomic
+
+Since we run a single worker with synchronous execution, a transfer (debit origin + credit destination) is inherently atomic — no partial state is possible. No need for database transactions or locks.
+
+### Dynamic Port
+
+`config/autoload/server.php` reads `env('PORT', 9501)`. Locally defaults to 9501; Railway injects its own port at runtime.
 
 ## Deploy
 
